@@ -3,11 +3,14 @@
 import datetime
 import os
 import asdf
-import openpyxl
-import numpy
+import shutil
 from excelScrape import excelScrape
+import sys
 
-def createBib():
+def createBib(fileName):
+
+    #TODO: Other type of BibTex entries than just article
+
 	#Gets reference information from user and outputs it in BibTex ready format
 
 	#Get user input
@@ -26,7 +29,7 @@ def createBib():
 	author = input('author: ')
 
 	#Create a bib ready object from user input
-	bib = {
+	bibDict = {
 	'title': title,
 	'language': language,
 	'publisher': publisher,
@@ -37,62 +40,72 @@ def createBib():
 	'year': year,
 	'issn': issn,
 	'doi': doi,
-	'author': author
+	'author': author,
+    'abstract': abstract
 
 	}
 
+    #Assuming Article format now we join all bib info into a string with correct format for LaTeX
+	bibList = ['@article{' + fileName + ',']
+	for key in bibDict:
+	    bibList.append(key + ' = {' + bibDict[key] + '},')
+	bibList[-1] = '}'
+	bib = '\n'.join(bibList)
+	print(bib)
 	return bib
 
+#Function asks user for a file containing the bib information and then prints it out to ask for confirmation
+def importBib():
+    print(os.listdir())
+    bibFileName = input('Which file contains the bib information (exact name with file extension): ')
+    bibFile = open(bibFileName)
+    bib = bibFile.read()
+    bibFile.close()
+    print(bib)
+    confirmBib = input('Is this bib format correct? (y or n): ')
+    if confirmBib.lower() == 'n':
+        print('Fix bib file and try again, process exiting')
+        sys.exit()
+    else:
+        return bib
 
 #Main function, handles the creation of new .asdf files
 def createASDF():
 	#Gather metadata for the file:
+	directorLoc = os.getcwd()
 	fileName = input('Requested filename, requested format Author-Year, Ex: ross-2018: ')
-	fileName = filenName.lower()
-	dataSets = {}
+	fileName = fileName.lower()
 	print('Gathering reference information and building bib')
-	bib = createBib()
-	notes = input('Feel like adding any notes? ')
+	manualCheck = input('Manual input(m) or import from external file (i): ')
+	os.chdir(directorLoc + '\\..\\InputFiles')
+	if manualCheck.lower() == 'm':
+	    bib = createBib(fileName)
+	else:
+	    bib = importBib()
+	notes = input('Feel like adding any comments to metadata? ')
 
 	#Creates the first metadata file tree
 	metadata = {
 	'FileName': fileName,
 	'dataSets': 'Empty dataset',
-	'BibTex': bib,
+	'Bib': bib,
 	'notes': notes,
 	'Created': datetime.datetime.now(),
 	'Updated': datetime.datetime.now()
 	}
 
 	#Collecting data
-	userReq = input('Start archiving data? (Y or N): ')
-	if userReq.lower() == 'y':
-		dataCollection = True
-	else:
-		print('Data collection not starting')
-		dataCollection = False
-
-	#TODO: Remove the loop, it is unecessary when excel scraping, the code in loop should not be deleted
-	dataSets = {}
-	dataIdx = 1
-	while dataCollection:
-		dataSetName = 'dataset'+str(dataIdx)
-		print('Showing current file directory')
-		print(os.listdir())
-		dataFile = input('Which file contains the desired data (type exact filename with extension)? ')
-		if dataFile.endswith('xlsx'):
-			dataSetList = excelScrape(dataFile)
-
-
-
-		userReq = input('Finished data collection? (Y or N): ')
-		if userReq.lower() != 'y':
-			dataCollection = False
-
+	print('Data collector starting')
+	print('Showing current file directory')
+	print(os.listdir())
+	dataFile = input('Which file contains the desired data (type exact filename with extension)? ')
+	if dataFile.endswith('xlsx'):
+		dataSetList = excelScrape(dataFile)
 
 
 	#Add metadata and all datasets into the main asdf tree
-	metadata['datasets'] = len(dataSetList)
+	metadata['dataSets'] = len(dataSetList)
+	os.chdir(directorLoc + '\\..\\Library')
 	print('Creating asdf file')
 	print('Metadata added')
 	print('Adding the datasets')
@@ -101,9 +114,11 @@ def createASDF():
 	i = 1
 	for dataSet in dataSetList:
 		tree['DataSet' + str(i)] = dataSet
+		i += 1
 
 	#Creating the asdf file and return control to main menu
 	af = asdf.AsdfFile(tree)
 	af.write_to(fileName + '.asdf')
+	os.chdir(directorLoc)
 	print('Asdf successfully created, returning to main menu')
 	return None
