@@ -1,6 +1,7 @@
 #main script to hold unto all features
 
 import os
+import subprocess
 
 print('Greetings fellow nuclear enthusiast what are you interested in?')
 print('(1) API: For working with data from the library this is probably the options you want.')
@@ -11,4 +12,4 @@ if choice == '1':
 elif choice == '2':
     print('Transfering to Director')
     os.chdir('Director')
-    os.system('director.py')
+    os.system('python director.py')

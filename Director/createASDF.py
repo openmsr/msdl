@@ -93,6 +93,7 @@ def createASDF():
 	'Created': datetime.datetime.now(),
 	'Updated': datetime.datetime.now()
 	}
+	#New comment
 
 	#Collecting data
 	print('Data collector starting')
