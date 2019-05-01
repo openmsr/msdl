@@ -3,6 +3,7 @@ import asdf
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import re
 from scipy import optimize
 
 class API:
@@ -62,8 +63,21 @@ class API:
         for dataSet in self.dataSetList:
             i = 0
             if dataSet['Property'][0].lower() == self.propert.lower():
-                temperatures[i] = dataSet['Temperature']
-                measurements[i] = dataSet['Measurements']
+                
+                #Attempt to make asdf file more robust in terms of misspelling, We try to get all the keys
+                #in a list and use a regular expression matching.
+                allKeys = list(dataSet.keys())
+                allKeysString = ' '.join(allKeys)
+                print(allKeysString)
+                tempRegex = re.compile(r'temp[\S]*|Temp[\S]*')
+                mo1 = tempRegex.search(allKeysString)
+                tempKey = mo1.group()
+                measureRegex = re.compile(r'meas[\S]*|Meas[\S]*')
+                mo1 = measureRegex.search(allKeysString)
+                measureKey = mo1.group()
+                
+                temperatures[i] = dataSet[tempKey]
+                measurements[i] = dataSet[measureKey]
                 i = i+1
         self.numMeasurements = i
         self.measurements = measurements
@@ -98,7 +112,7 @@ class API:
             plt.xlabel('Temperature (°C)')
             plt.ylabel(self.propert + ' (' + self.unit + ')')
             
-            #Doing individual regression and plotting
+            #Doing individual regression and plotting, This will be moved to a different function is future versions
             xData = np.array(self.temperatures[i])
             yData = np.array(self.measurements[i])
             self.regressData(xData,yData)
@@ -139,6 +153,6 @@ class API:
         
 ## Example Run
         
-newAPI = API('Viscosity',['Lif','bef2'])
+newAPI = API('Viscosity',['bef2'])
 newAPI.initialize()
 newAPI.viewProperties()

@@ -13,7 +13,7 @@ import numpy
 #TODO: Refactor code so that scraping an excel sheet is it's seperate function
 def excelScrape(fileName):
     dataSetList = []
-    wb = openpyxl.load_workbook(fileName)
+    wb = openpyxl.load_workbook(fileName,data_only=True)
     #For each sheet we get 1 dataset, we want to loop through all the sheets
     for sheetName in wb.sheetnames:
         sheet = wb[sheetName]
