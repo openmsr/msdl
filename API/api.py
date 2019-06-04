@@ -68,7 +68,6 @@ class API:
                 #in a list and use a regular expression matching.
                 allKeys = list(dataSet.keys())
                 allKeysString = ' '.join(allKeys)
-                print(allKeysString)
                 tempRegex = re.compile(r'temp[\S]*|Temp[\S]*')
                 mo1 = tempRegex.search(allKeysString)
                 tempKey = mo1.group()
@@ -152,7 +151,6 @@ class API:
         return y
         
 ## Example Run
-        
 newAPI = API('Viscosity',['bef2'])
 newAPI.initialize()
 newAPI.viewProperties()
