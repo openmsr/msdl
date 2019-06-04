@@ -27,7 +27,7 @@ class API:
             af = asdf.open(file)
             
             for dataSet in af.tree:
-                if not dataSet.startswith('DataSet'):
+                if not dataSet.startswith('dataSet'):
                     continue
                 
                 
@@ -36,7 +36,7 @@ class API:
                 requestList = [a.lower() for a in self.salts]
                 saltList.sort()
                 requestList.sort()
-                
+
                 
                 if saltList == requestList:
                     if self.composition == []:
@@ -52,6 +52,7 @@ class API:
         #Finally change the working directory back to the original one
         os.chdir(apiLoc)
         self.dataSetList = dataSetList
+        
         return dataSetList
     
     
@@ -78,10 +79,10 @@ class API:
                 temperatures[i] = dataSet[tempKey]
                 measurements[i] = dataSet[measureKey]
                 i = i+1
+                
         self.numMeasurements = i
         self.measurements = measurements
         self.temperatures = temperatures
-        
         return 0
     
     #TODO MAKE THE FUNCTION once more datapoints are gathered
@@ -107,7 +108,7 @@ class API:
     #Using matplotlib, this generates figures containing datapoint and regression
     def viewProperties(self):
         for i in range(self.numMeasurements):
-            plt.plot(self.temperatures[i],self.measurements[i],'bs', label='ID HERE')
+            #plt.plot(self.temperatures[i],self.measurements[i],'bs', label='ID HERE')
             plt.xlabel('Temperature (°C)')
             plt.ylabel(self.propert + ' (' + self.unit + ')')
             
@@ -151,6 +152,10 @@ class API:
         return y
         
 ## Example Run
-newAPI = API('Viscosity',['bef2'])
+#newAPI = API('Viscosity',['NaBF4','NaF'])
+        
+newAPI = API('Viscosity',['NaBF4','NAF'])
+
 newAPI.initialize()
+newAPI.getMeasurements()
 newAPI.viewProperties()

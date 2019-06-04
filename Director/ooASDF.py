@@ -103,11 +103,12 @@ class ooASDF:
             
 
 #Example run
-newASDF = ooASDF('example')
+newASDF = ooASDF('oakridge1973')
 
 ## Make sure InputFiles folder has an excel file and bib file before uncommenting
+
 newASDF.addData()
-newASDF.importBib('bibFile.bib')
+newASDF.importBib('oakridge.bib')
 
 
 newASDF.finish()
