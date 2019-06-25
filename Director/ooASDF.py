@@ -104,11 +104,6 @@ class ooASDF:
 
 #Example run
 newASDF = ooASDF('tufeu1985')
-
-## Make sure InputFiles folder has an excel file and bib file before uncommenting
-
-newASDF.addData()
-newASDF.importBib('Reference.txt')
-
-
+newASDF.addData()       #Ensure that InputFiles folder has an excel file
+newASDF.importBib('Reference.txt')  #Ensure that there is a Reference file in InputFiles
 newASDF.finish()
