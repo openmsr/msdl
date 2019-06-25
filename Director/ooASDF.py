@@ -50,7 +50,7 @@ class ooASDF:
         bib.close()
         self.tree['metadata']['bibTex'] = bibText
         bibFileLoc = os.getcwd() + '\\' +  bibFile
-        os.rename(bibFileLoc, self.rootLoc + '\\ConvertedFiles\\' + bibFile)
+        os.rename(bibFileLoc, self.rootLoc + '\\ConvertedFiles\\' + self.fileName + "_REF.txt")
         return None
         
     
@@ -103,12 +103,12 @@ class ooASDF:
             
 
 #Example run
-newASDF = ooASDF('oakridge1973')
+newASDF = ooASDF('tufeu1985')
 
 ## Make sure InputFiles folder has an excel file and bib file before uncommenting
 
 newASDF.addData()
-newASDF.importBib('oakridge.bib')
+newASDF.importBib('Reference.txt')
 
 
 newASDF.finish()

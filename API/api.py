@@ -61,8 +61,8 @@ class API:
         measurements = [[]]
         temperatures = [[]]
         parameters = [[]]
+        i = 0
         for dataSet in self.dataSetList:
-            i = 0
             if dataSet['Property'][0].lower() == self.propert.lower():
                 
                 #Attempt to make asdf file more robust in terms of misspelling, We try to get all the keys
@@ -88,6 +88,7 @@ class API:
     #TODO MAKE THE FUNCTION once more datapoints are gathered
     #Creates a vector where all measurements are combined
     def combineMeasurements(self):
+        
         return 0
     
     #TODO: Loop through each individual dataset, waiting for more data too test that
@@ -96,9 +97,11 @@ class API:
     def regressData(self,x,y):
         #TODO Add the functions for other properties, Will do when I get data for other properties
         if self.propert.lower() == 'viscosity':
-            test_func = lambda x,a,b: self.Arrhenius(x,a,b)
-            p0 = [0.2,2000]
-        params,covar = optimize.curve_fit(test_func,x,y,p0)
+            basis_func = lambda x,a,b: self.Arrhenius(x,a,b)
+        elif self.propert.lower() == 'density':
+            basis_func = lambda x,a,b: self.oneDimensionalLine(x,a,b)
+        p0 = [0.2,2000]
+        params,covar = optimize.curve_fit(basis_func,x,y,p0)
         self.parameters = params
         
         
@@ -106,7 +109,9 @@ class API:
         return 0
     
     #Using matplotlib, this generates figures containing datapoint and regression
-    def viewProperties(self):
+    def makePlot(self):
+        
+        #If only one composition exists
         for i in range(self.numMeasurements):
             #plt.plot(self.temperatures[i],self.measurements[i],'bs', label='ID HERE')
             plt.xlabel('Temperature (°C)')
@@ -119,7 +124,13 @@ class API:
             xx = np.linspace(min(xData),max(xData),num=100)
             if self.propert.lower() == 'viscosity':
                 yy = self.Arrhenius(xx,self.parameters[0],self.parameters[1])
+            elif self.propert.lower() == 'density':
+                yy = self.oneDimensionalLine(xx,self.parameters[0],self.parameters[1])
             plt.plot(xx,yy)
+            plt.scatter(xData,yData)
+            
+            
+        #TODO Set a binary mixture here
         return 0
     
     #Method to initialize the object (i.e. scan the library and do some preliminary data processing)
@@ -143,6 +154,9 @@ class API:
     def Arrhenius(self,x,a,b):
         return a*np.exp(b/(8.314*x))
     
+    #Simple linear regression for Density
+    def oneDimensionalLine(self,x,a,b):
+        return a*x + b
     
     #TODO: Make FUnction
     #Function to predict new data points, Plan is to generally predict with Kriging but can include heuristics
@@ -154,8 +168,9 @@ class API:
 ## Example Run
 #newAPI = API('Viscosity',['NaBF4','NaF'])
         
-newAPI = API('Viscosity',['NaBF4','NAF'])
+newAPI = API('density',['lif','bef2'])
 
 newAPI.initialize()
 newAPI.getMeasurements()
-newAPI.viewProperties()
+newAPI.makePlot()
+print(newAPI.numMeasurements)
