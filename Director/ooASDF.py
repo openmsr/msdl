@@ -71,7 +71,6 @@ class ooASDF:
         
         
         datFileLoc = os.getcwd() + '\\' +  dataFile
-        #TODO: Use flag=0 to scan entire excel file and flag=1 to scan a single sheet
         dataSetList = excelScrape(dataFile)
         
         for dataSet in dataSetList:
