@@ -119,7 +119,7 @@ class API:
         #Do to keeping track with variable l, if it's 0 it means no datasets were found that match the physical property        
         if l>0:        
             self.X = X
-            self.Y = Y
+            self.Y = np.array(Y)
         #Set flags and ending function early to prevent raising exceptions
         else:
             print('No data in libray matches specifications')
@@ -147,6 +147,16 @@ class API:
         else:
             self.binary = False
         
+        
+        #Casting whatever may pop up to float64, (Some scan cases lead to string data values)
+        if X.dtype == "<U32":
+            X = np.char.replace(X, ' ', '')
+            X = X.astype(float)
+        if Y.dtype == "<U32":
+            Y = np.char.replace(Y, ' ', '')
+            Y = Y.astype(float)
+        self.Y = Y
+        self.X = X
         return 0
         
     #Creates a regression of the data
@@ -276,11 +286,12 @@ class API:
 ## Example Run
 #newAPI = API('Viscosity',['NaBF4','NaF'])
         
-newAPI = API('viscosity',['CaCl2'])
+newAPI = API('density',['LiBr'])
 newAPI.initialize()
 newAPI.makePlot()
 
-print(newAPI.modelType)
+print(newAPI.X)
+print(newAPI.Y)
 
 #newAPI.initialize()
 #newAPI.getMeasurements()

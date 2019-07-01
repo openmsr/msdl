@@ -102,7 +102,7 @@ class ooASDF:
             
 
 #Example run
-newASDF = ooASDF('nsrds1979')
+newASDF = ooASDF('test')
 newASDF.addData()       #Ensure that InputFiles folder has an excel file
-newASDF.importBib('nsrds.txt')  #Ensure that there is a Reference file in InputFiles
+newASDF.importBib('testBib.txt')  #Ensure that there is a Reference file in InputFiles
 newASDF.finish()
