@@ -150,7 +150,9 @@ class API:
         return 0
         
     #Creates a regression of the data
-    def regressData(self,x,y):
+    def regressData(self):
+        x = np.array(self.X[-1,:])
+        y = np.array(self.Y)
         if self.propert.lower() == 'viscosity':
             basis_func = lambda x,a,b: self.Arrhenius(x,a,b)
             p0 = [0.2,2000]
@@ -186,7 +188,7 @@ class API:
             #Create data regression line
             xData = np.array(self.X[-1,:])
             yData = np.array(self.Y)
-            self.regressData(xData,yData)
+            self.regressData()
             xx = np.linspace(min(xData),max(xData),num=100)
             if self.propert.lower() == 'viscosity':
                 yy = self.Arrhenius(xx,self.parameters[0],self.parameters[1])
@@ -250,11 +252,8 @@ class API:
         self.scanLibrary()
         self.organizeData()
         if self.oneDimensional:
-            #self.regressData() <- Add when function is finished
-            pass
-        else:
-            #self.buildModel() <- Add when function is finished
-            pass
+            self.regressData()
+        self.buildModel()
     
     
     ## Regression Base Functions
@@ -277,9 +276,7 @@ class API:
 #newAPI = API('Viscosity',['NaBF4','NaF'])
         
 newAPI = API('viscosity',['nano3', 'kno3'])
-newAPI.scanLibrary()
-newAPI.organizeData()
-newAPI.buildModel()
+newAPI.initialize()
 newAPI.makePlot()
 
 #newAPI.initialize()
