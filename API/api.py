@@ -25,7 +25,7 @@ class API:
         
         #Setting the unit of the physical property (For picture caption)
         if propert.lower() == 'viscosity':
-            self.unit = 'mPa*s'
+            self.unit = 'Pa*s'
         elif propert.lower() == 'density':
             self.unit = 'g/cm3'
         elif propert.lower() == 'thermal conductivity':
@@ -246,6 +246,7 @@ class API:
         
     
     def printExcelReport(self):
+        
         return 0
     
     def initialize(self):
@@ -275,9 +276,11 @@ class API:
 ## Example Run
 #newAPI = API('Viscosity',['NaBF4','NaF'])
         
-newAPI = API('viscosity',['nano3', 'kno3'])
+newAPI = API('viscosity',['CaCl2'])
 newAPI.initialize()
 newAPI.makePlot()
+
+print(newAPI.modelType)
 
 #newAPI.initialize()
 #newAPI.getMeasurements()
