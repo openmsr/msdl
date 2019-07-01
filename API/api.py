@@ -5,12 +5,18 @@ import matplotlib.pyplot as plt
 import math
 import re
 from scipy import optimize
+import openpyxl
 
 #For Kriging model
 import pyKriging  
 from pyKriging.krige import kriging  
 from pyKriging.samplingplan import samplingplan
+from openpyxl.drawing.image import Image
 
+#For the surface plot
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D
 
 class API:
     def __init__(self, propert, salts, composition = []):
@@ -23,6 +29,8 @@ class API:
         self.source = []            #List of asdf files that include the salt combo
         self.allSets = []          #List of all datasets currently in library
         
+        self.loc = os.getcwd()
+        
         #Setting the unit of the physical property (For picture caption)
         if propert.lower() == 'viscosity':
             self.unit = 'Pa*s'
@@ -30,6 +38,14 @@ class API:
             self.unit = 'g/cm3'
         elif propert.lower() == 'thermal conductivity':
             self.unit = 'W/(m K)'
+        elif propert.lower() == 'surface tension':
+            self.unit = 'dyn/cm'
+        elif propert.lower() == 'electric conductance':
+            self.unit = '1/(ohm cm)'
+        elif propert.lower() == 'heat capacity':
+            self.unit = 'cal/(K mol)'
+        elif propert.lower() == 'vapor pressure':
+            self.unit = 'mmHg'
         else:
             self.unit = 'Unit undefined'
             
@@ -166,9 +182,23 @@ class API:
         if self.propert.lower() == 'viscosity':
             basis_func = lambda x,a,b: self.Arrhenius(x,a,b)
             p0 = [0.2,2000]
-        elif self.propert.lower() == 'density' or self.propert.lower() == 'thermal conductivity':
+            self.regressionType = 'a*exp(b/(8.314*T))'
+        elif self.propert.lower() == 'density' or self.propert.lower() == 'thermal conductivity' or self.propert.lower() == 'surface tension':
             basis_func = lambda x,a,b: self.oneDimensionalLine(x,a,b)
             p0 = [0.2,2000]
+            self.regressionType = 'a + bT'
+        elif self.propert.lower() == 'electric conductance':
+            basis_func = lambda x,a,b,c: self.parabolic(x,a,b,c)
+            p0 = [0,0,0]
+            self.regressionType = 'a + bT + cT^2'
+        elif self.propert.lower() == 'heat capacity':
+            basis_func = lambda x,a,b,c: self.revParabolic(x,a,b,c)
+            p0 = [0,0,0]
+            self.regressionType = 'a + bT + cT^(-2)'
+        elif self.propert.lower() == 'vapor pressure':
+            basis_func = lambda x,a,b: self.logfun(x,a,b)
+            p0 = [0,0]
+            self.regressionType = '10^(a + b/T)'
         params,covar = optimize.curve_fit(basis_func,x,y,p0)
         self.parameters = params
         return 0
@@ -178,13 +208,17 @@ class API:
             print('Statistical model: Simple Kriging')
             X = self.X
             Y = self.Y
+
             if self.oneDimensional:
                 X = X[-1,:]
-            X = X.reshape(-1,1)
-            
+                X = X.reshape(-1,1)
+            else:
+                X = X.transpose()
+
             k = kriging(X,Y, name ='simple')
             k.train()
             self.fitModel = k
+            
         else:
             print('Invalid model type request')
         return 0
@@ -202,9 +236,14 @@ class API:
             xx = np.linspace(min(xData),max(xData),num=100)
             if self.propert.lower() == 'viscosity':
                 yy = self.Arrhenius(xx,self.parameters[0],self.parameters[1])
-            elif self.propert.lower() == 'density' or self.propert.lower() == 'thermal conductivity':
+            elif self.propert.lower() == 'density' or self.propert.lower() == 'thermal conductivity' or self.propert.lower() == 'surface tension':
                 yy = self.oneDimensionalLine(xx,self.parameters[0],self.parameters[1])
-            
+            elif self.propert.lower() == 'electric conductance':
+                yy = self.parabolic(xx,self.parameters[0],self.parameters[1],self.parameters[2])
+            elif self.propert.lower() == 'heat capacity':
+                yy = self.revParabolic(xx,self.parameters[0],self.parameters[1],self.parameters[2])
+            elif self.propert.lower() == 'vapor pressure':
+                yy = self.logfun(xx,self.parameters[0],self.parameters[1])
             #Since graph is one dimensional we extract the composition to print on graph
             comp = np.zeros(self.X.shape[0]-1)
             
@@ -218,53 +257,173 @@ class API:
                 yFit[i] = self.fitModel.predict([xx[i]])
 
             
+            self.xx = xx
+            self.yFit = yFit
             
             #First plot, data along with regression
-            plt.figure(0)
+            figRE = plt.figure(0)
             plt.xlabel('Temperature (°C)')
             plt.ylabel(self.propert.capitalize() + ' (' + self.unit + ')')
             plt.scatter(xData,yData)
             plt.plot(xx,yy)
             plt.legend(["Regression Fit","Data"])
             plt.title(' '.join(self.salts) + ' ' + np.array2string(comp))
+            plt.savefig('Regression.png')
+            self.figRe = figRE
             
             #Second plot, data along with blackbox model
-            plt.figure(1)
+            figBL = plt.figure(1)
             plt.xlabel('Temperature (°C)')
             plt.ylabel(self.propert.capitalize() + ' (' + self.unit + ')')
             plt.scatter(xData,yData)
             plt.plot(xx,yFit,'r')
             plt.legend(["Blackbox Fit","Data"])
             plt.title(' '.join(self.salts) + ' ' + np.array2string(comp))
-            
-            
+            plt.savefig('Model.png')
+            self.figBL = figBL
             
         elif self.binary:
-            self.fitModel.plot()
+            alpha = np.linspace(np.amin(self.X[0,:]),np.amax(self.X[0,:]),100)
+            T = np.linspace(np.amin(self.X[1,:]),np.amax(self.X[1,:]),100)
+            print('Plotting surface plot')
+            X,Y = np.meshgrid(alpha,T)
+            Z = np.zeros(X.shape)
+            for i in range(alpha.shape[0]):
+                for j in range(T.shape[0]):
+                    Z[i,j] = self.fitModel.predict([X[i,j],Y[i,j]])
+            fig = plt.figure()
+            ax = fig.gca(projection = '3d')
+            surf = ax.plot_surface(X,Y,Z, cmap=cm.coolwarm, linewidth=0)
+            ax.set_zlim(np.amin(self.Y),np.amax(self.Y))
+            ax.set_xlim(alpha[0],alpha[-1])
+            ax.set_ylim(T[0],T[-1])
+            ax.zaxis.set_major_locator(LinearLocator(10))
+            ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+            fig.colorbar(surf, shrink = 0.5, aspect=5)
+            if np.mean(alpha) > 1:
+                perOrFrac = 'Percent'
+            else:
+                perOrFrac = 'Fraction'
+            ax.set_xlabel('Mole ' + perOrFrac + ' of ' + self.salts[0])
+            ax.set_ylabel('Temperature °C')
+            ax.set_zlabel(self.propert.capitalize() + ' ' + self.unit)
+            plt.savefig('Model.png')
+            plt.show()
         else:
             print("Can't make relevant figure for dimensions larger than 3")
             
         return 0
-    
-    #Method to initialize the object (i.e. scan the library and do some preliminary data processing)
-    #so it's ready for data viewing
-    
-    
-    #Function that tries to find a minimum and maximum of the dataset, finds both min and max of raw data and then utilizing fit models to predict it.
-    def minMax(self):
-        return 0
         
     
+    #Function creates the output excel file
     def printExcelReport(self):
+        wb = openpyxl.Workbook()
+        wb.create_sheet(index = 0, title='Overview')
+        wb.create_sheet(index = 1, title='Data Export')
+        wb.create_sheet(index = 2, title='Regression Info')
+        wb.create_sheet(index = 3, title = 'Model Fit')
+        
+        sheet = wb.get_sheet_by_name('Overview')
+        sheet['A1'] = 'Property'
+        
+        sheet['B1'] = self.propert.capitalize()
+        sheet['C1'] = self.unit
+        sheet['A2'] = 'Salts'
+        for i in range(len(self.salts)):
+            sheet.cell(row = 2, column=i+2).value = self.salts[i]
+        
+        sheet['A3'] = 'Regerssion Data Available'
+        if self.regressionType == 'None':
+            sheet['B3'] = 'No'
+        else:
+            sheet['B3'] = 'Yes'
+            
+        sheet['A4'] = 'Model fit done'
+        if self.fitModel == 'None':
+            sheet['B4'] = 'No'
+        else:
+            sheet['B4'] = 'Yes'
+        
+        sheet['A5'] = 'Number of datapoints'
+        sheet['B5'] = self.X.shape[1]
+        
+        sheet['A6'] = 'Temperature Range (C)'
+        sheet['B6'] = np.amin(self.X[-1,:])
+        sheet['C6'] = np.amax(self.X[-1,:])
+        
+        sheet = wb.get_sheet_by_name('Data Export')
+        sheet['A1'] = 'X'
+        
+        
+        if self.binary:
+            sheet['A2'] = self.salts[0] + ' to ' + self.salts[1] + ' molar ratio'
+            sheet['A3'] = 'Temperature °C'
+            
+            for i in range(self.X.shape[1]):
+                sheet.cell(row = 2, column = i + 2).value = self.X[0,i]
+                sheet.cell(row = 3, column = i + 2).value = self.X[1,i]
+            i = 1
+        
+        else:
+            for i in range(len(self.salts)):
+                sheet.cell(row = i+2, column = 1).value = self.salts[i]
+                sheet.cell(row = i+3, column = 1).value = 'Temperature °C'
+            
+        for i in range(self.X.shape[0]):
+            for j in range(self.X.shape[1]):
+                sheet.cell(row = i + 2, column =  j+2).value = self.X[i,j]
+        
+        yStart = i + 4
+        sheet.cell(row = yStart, column = 1).value = 'Y'
+        sheet.cell(row = yStart+1, column = 1).value = self.propert.capitalize()
+        
+        
+        for i in range(self.Y.shape[0]):
+            sheet.cell(row = yStart +1, column = i+2).value = self.Y[i]
+        
+        sheet = wb.get_sheet_by_name('Regression Info')
+        
+        if self.regressionType == 'None':
+            sheet['A1'] = 'N/A'
+        else:
+            sheet['A1'] = 'Regression Function'
+            sheet['B1'] = self.regressionType
+            sheet['A2'] = 'Parameters'
+            for i in range(len(self.parameters)):
+                sheet.cell(row = 2, column = 2+i).value = self.parameters[i]
+                
+            imag = Image('Regression.png')
+            sheet.add_image(imag,'A3')
+            
+        sheet = wb.get_sheet_by_name('Model Fit')
+        if self.fitModel == 'None':
+            sheet['A1'] = 'N/A'
+        elif self.oneDimensional or self.binary:
+            image = Image('Model.png')
+            sheet.add_image(image,'A1')
+        else:
+            sheet['A1'] = 'Model details in Python API object'
+        
+        newLoc = self.loc + '\..\Output'
+        wb.save('output.xlsx')
+        
+    
         
         return 0
     
-    def initialize(self):
+    def initializeData(self):
+        self.scanLibrary()
+        self.organizeData()
+        self.printExcelReport()
+        
+    def intializeFull(self):
         self.scanLibrary()
         self.organizeData()
         if self.oneDimensional:
             self.regressData()
         self.buildModel()
+        self.makePlot()
+        self.printExcelReport()
     
     
     ## Regression Base Functions
@@ -272,26 +431,32 @@ class API:
     def Arrhenius(self,x,a,b):
         return a*np.exp(b/(8.314*x))
     
-    #Simple linear regression for Density
+    #Simple linear regression for Density, Surface Tension and Thermal Conductivity
     def oneDimensionalLine(self,x,a,b):
-        return a*x + b
+        return a + b*x
     
-    #TODO: Make FUnction
-    #Function to predict new data points, Plan is to generally predict with Kriging but can include heuristics
-    #for "smarter" prediction (ex: If composition is included in library known, use one of the regression methods)
-    def predict(self,x):
-        y = 0
-        return y
+    #Function for Eletrical Conductance fit
+    def parabolic(self,x,a,b,c):
+        return a + b*x + c*x**2
+    
+    #Function to fit Heat Capacity
+    def revParabolic(self,x,a,b,c):
+        return a + b*x + c*x**(-2)
+    
+    #Function to fit Vapor Pressure
+    def logfun(self,x,a,b):
+        d = a + b/x
+        return 10**d
         
 ## Example Run
 #newAPI = API('Viscosity',['NaBF4','NaF'])
         
-newAPI = API('density',['LiBr'])
-newAPI.initialize()
-newAPI.makePlot()
+newAPI = API('density',['licl','kcl'])
+newAPI.intializeFull()
 
-print(newAPI.X)
-print(newAPI.Y)
+
+
+
 
 #newAPI.initialize()
 #newAPI.getMeasurements()
