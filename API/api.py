@@ -12,6 +12,7 @@ import pyKriging
 from pyKriging.krige import kriging  
 from pyKriging.samplingplan import samplingplan
 from openpyxl.drawing.image import Image
+from pyKriging.regressionkrige import regression_kriging
 
 #For the surface plot
 from matplotlib import cm
@@ -24,7 +25,7 @@ class API:
         self.salts = salts             #List of desired salt combo
         self.composition = composition #Salt composition
         self.regressionType = 'None' #Description of the Regression type
-        self.modelType = 'kriging'    #Type of model to fit the data (Default Kriging for now)
+        self.modelType = 'Regression kriging'    #Type of model to fit the data (Default Kriging for now)
         self.fitModel = 'None'      #Objec to store the fit model
         self.source = []            #List of asdf files that include the salt combo
         self.allSets = []          #List of all datasets currently in library
@@ -204,8 +205,8 @@ class API:
         return 0
     
     def buildModel(self):
-        if self.modelType == 'kriging':
-            print('Statistical model: Simple Kriging')
+        if self.modelType == 'Regression kriging':
+            print('Statistical model: Regression kriging')
             X = self.X
             Y = self.Y
 
@@ -215,7 +216,7 @@ class API:
             else:
                 X = X.transpose()
 
-            k = kriging(X,Y, name ='simple')
+            k = regression_kriging(X,Y)
             k.train()
             self.fitModel = k
             
