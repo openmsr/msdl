@@ -81,7 +81,8 @@ class API:
                         dataSetList.append(af.tree[dataSet])
                         self.source.append(file)    #Append filename to the source list
                     else:
-                        if self.composition == af.tree[dataSet]['Composition']:     #If composition is specified, only grab specific composition
+                        
+                        if all(np.array(self.composition) == np.array(af.tree[dataSet]['Composition'])):     #If composition is specified, only grab specific composition
                             dataSetList.append(af.tree[dataSet])
                             self.source.append(file)
                         else:
@@ -215,7 +216,6 @@ class API:
                 X = X.reshape(-1,1)
             else:
                 X = X.transpose()
-
             k = regression_kriging(X,Y)
             k.train()
             self.fitModel = k
@@ -308,6 +308,7 @@ class API:
             ax.set_xlabel('Mole ' + perOrFrac + ' of ' + self.salts[0])
             ax.set_ylabel('Temperature °C')
             ax.set_zlabel(self.propert.capitalize() + ' ' + self.unit)
+            ax.set_title(' '.join(self.salts))
             plt.savefig('Model.png')
             plt.show()
         else:
@@ -417,7 +418,7 @@ class API:
         self.organizeData()
         self.printExcelReport()
         
-    def intializeFull(self):
+    def initializeFull(self):
         self.scanLibrary()
         self.organizeData()
         if self.oneDimensional:
@@ -449,17 +450,10 @@ class API:
         d = a + b/x
         return 10**d
         
-## Example Run
-#newAPI = API('Viscosity',['NaBF4','NaF'])
+#Run code after this line
         
-newAPI = API('density',['licl','kcl'])
-newAPI.intializeFull()
-
-
-
-
-
-#newAPI.initialize()
-#newAPI.getMeasurements()
-#newAPI.makePlot()
-#print(newAPI.numMeasurements)
+""" Example Run
+binaryMixture = API(’density’,[’LiCl’,’KCl’])
+binaryMixture.initializeFull()
+print(binaryMixture.fitModel.predict([62.3,752.4]))
+"""

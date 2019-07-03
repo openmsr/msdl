@@ -100,9 +100,11 @@ class ooASDF:
     
             
             
+#Type Commands after this line
 
-#Example run
+''' Example Commands
 newASDF = ooASDF('nsrds1979')
 newASDF.addData()       #Ensure that InputFiles folder has an excel file
-#newASDF.importBib('bibInfo.txt')  #Ensure that there is a Reference file in InputFiles
+newASDF.importBib('bibInfo.txt')  #Ensure that there is a Reference file in InputFiles
 newASDF.finish()
+'''

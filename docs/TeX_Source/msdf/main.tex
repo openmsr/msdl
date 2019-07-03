@@ -1,0 +1,131 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% USFD Academic Report Template
+% Prof. Roger K. Moore
+% University of Sheffield
+% 30 July 2018
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[11pt,oneside]{article}
+\usepackage[margin=1.2in]{geometry}
+\usepackage[toc,page]{appendix}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{lipsum}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{textcomp}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=black,
+}
+
+\begin{document}
+
+\captionsetup[figure]{margin=1.5cm,font=small,labelfont={bf},name={Figure},labelsep=colon,textfont={it}}
+\captionsetup[table]{margin=1.5cm,font=small,labelfont={bf},name={Table},labelsep=colon,textfont={it}}
+\setlipsumdefault{1}
+
+
+\begin{titlepage}
+
+
+% -------------------------------------------------------------------
+% You need to edit the details here
+% -------------------------------------------------------------------
+
+\begin{center}
+{\LARGE Technical University of Denmark}\\[1cm]
+\linespread{1.2}\huge {\bfseries Initiation of an open-source molten salt data library.}\\[1cm]
+\linespread{1}
+\includegraphics[width=3cm]{images/dtulogo.PNG}\\[1cm]
+{\Large Atli Freyr Magnússon - s172415 \\
+Binoy Hasmukh Shah - s171890}\\[1cm]
+{\large \emph{Supervisors:\\} 
+Associate professor at DTU - Peter Szabo\\
+Chief Technology Officer at Copenhagen Atomics - Aslak Stubsgaard}\\[1.25cm] % if applicable
+\large A report submitted in partial fulfillment of the requirements\\ for 5 ECTS as a Special Project\\[0.3cm] 
+\textit{in the}\\[0.3cm]
+Department of Chemical and Biochemical Engineering
+\\[2cm]
+June 28, 2019
+\end{center}
+
+\end{titlepage}
+
+
+% -------------------------------------------------------------------
+% Declaration
+% -------------------------------------------------------------------
+
+\newpage
+\section*{\Large Declaration}
+
+All sentences or passages quoted in this document from other people's work have been specifically acknowledged by clear cross-referencing to author, work and page(s).  Any illustrations that are not the work of the author of this report have been used with the explicit permission of the originator and are specifically acknowledged.  I understand that failure to do this amounts to plagiarism and will be considered grounds for failure.\\[1cm]
+
+\noindent Name:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+\noindent Signature:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+\noindent Date:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+\vspace{5cm}
+
+\noindent Name:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+\noindent Signature:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+\noindent Date:\\[1mm]
+\rule[1em]{25em}{0.5pt}
+
+% -------------------------------------------------------------------
+% Contents, list of figures, list of tables
+% -------------------------------------------------------------------
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+
+% -------------------------------------------------------------------
+% Main sections (as required)
+% -------------------------------------------------------------------
+
+
+\input{sections/abstract.tex}
+\input{sections/introduction.tex}
+\input{sections/dataGather.tex}
+\input{sections/dataLibrary.tex}
+\input{sections/conclusion.tex}
+
+
+% -------------------------------------------------------------------
+% Bibliography
+% -------------------------------------------------------------------
+
+\bibliographystyle{abbrv} 
+\bibliography{mybibliography} 
+
+
+% -------------------------------------------------------------------
+% Appendices
+% -------------------------------------------------------------------
+ \newpage
+\begin{appendices}
+\input{sections/appendix.tex}
+\end{appendices}
+
+\end{document}

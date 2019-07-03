@@ -1,0 +1,75 @@
+\section{Data Gathering}
+This section describes Step-1 of the library creation. It will describe the type of data gathered, properties and salts, which were initially considered. The reason behind the selection is outlined. Since experimental data is considered, the papers which show their results in their report are selected. Literature review of such papers revealed some interesting results, which are discussed. The amount of data gathered is also listed. Since this project can and should be continued in future, this section serves as guide on how to start the process. \newline
+
+\subsection{Experimental data selection }
+
+During the high tide when suitable funding was available for research related to properties of molten salts, a period between 1950-1985, there were many experiments conducted and published by independent researchers as well as ORNL, which published sets of volumes containing both experimental as well as modelling values for molten salt properties. Some of the work was published in Idaho National Laboratory for U.S. Department of Energy and Office of Nuclear Energy. One of the main criterion for initial selection of data was availability of actual experimental values in tabular form. This significantly reduced the data available and gave a surprising inside about the work being carried out, the latter part will be discussed towards the end of this section. \newline
+
+To give an example \cite{osti_980801}, was published which contained the title as \textit{Engineering Database of Liquid Salt Thermophysical and Thermochemical Properties}, they review properties of various salts and mention the results. However, experimental data is not mentioned here, instead correlations are mentioned, data for which is taken from literature. This material then is not as relevant for the library, because it does not have experimental values, but it does point in the right direction, via references to the source data. \newline
+
+Compared to that \cite{ abe1981a}, is one of the first paper included in the library. This was the category of paper which were desirable and required for the library. It mentions the experimental process, characteristics of the material used, an most important for us, Experimental results of a property with its constituent composition and the Temperature range over which it is observed. Other information such as amount of experiments conducted at each Temp point, error propagation and uncertainty is also noted down, which is an advantage. Papers like this are hard to find but true to keep. This is shown by a simple search for citation in further studies. A single experimental paper is then used by multiple sources to model or analyze the property and work on further development of the model.
+After obtaining a few papers, a set format to extract the data into excel files was created. Tabula was used to extract data from the pdf files, since it would have been a tedious task manually. The standard format used in excel file is shown in table \ref{tab:st}. \newline
+
+\begin{table}[h]
+\centering
+\caption{Excel Format for Data Extraction}
+\begin{tabular}{c|c} 
+\hline
+Property                                                     & Description     \\ \hline
+Components                                                   & Constituent Compounds   \\ 
+Composition                                                  & Molar Fraction of Salt in Mixture \\ 
+Temperature                                                  & Taken in \textdegree{}C  \\ 
+Measurements                                                 & Value of physical property   \\ 
+Data Points                                                  & Number of experiments     \\ 
+Parameters                                        & Regression Parameters Reported   \\ 
+Regression Type                                              & Basis Function used in regression            \\ 
+\begin{tabular}[c]{@{}l@{}}Error\\   Range (+ -)\end{tabular} & Deviation from Regression in \%                       \\ \hline
+\end{tabular}
+\label{tab:st}
+\end{table}
+
+This streamlined the extraction process, then next step was selection of salts and properties which are readily available and which could be most helpful.
+
+\subsection{Salts and properties considered}
+ To start with, salts which were utilized frequently in MSR were analyzed. They were FLiBe, a mixture of lithium fluoride (LiF) and beryllium fluoride (BeF2) and FLiNaK, a ternary eutectic alkaline metal fluoride salt mixture of LiF-NaF-KF. Fluoride salts were primarily researched for MSR, until it was discovered that Chlorides have more stability at high temperature. The salt considered there was LiCl−KCl mixture,which had data points over a range of temperature for multiple compoistion. Over the course of this project, 25 salts in various compositions were analyzed. The full list is found in Appendix A- TableA1.
+ 
+ 
+Properties, which were vital for application of a molten salt and ones, which were experimented abundantly, were started with. These were Density, Viscosity and Thermal Conductivity. The full list of properties which were evaluated are shown in Table \ref{tab:unitStandards} in Section 3.
+
+\subsection{Findings during Literature review}
+
+At the start of the project a general sweep was done and the papers collected were analyzed. Three class of papers were obtained.
+\begin{itemize} 
+\item Experimental results of a salt property in tabular form with each individual data set mentioned [Class 1] [20\%]
+\item Mixture of Experimental and Fitted results in Graphical Format [Class-II] [40\%]
+\item Results from correlations developed on either experimental or modelling work of other researchers. [Class- III] [40\%] 
+\end{itemize}
+
+Class I papers are ideally required for the library. They are also required to ensure that the program has enough actual data-points for regression and statistical modelling. However, only 20\% of the total papers founds met this criterion. All the papers currently in the library are Class-I papers. 
+
+In Class-II \& Class-III papers, it was observed that experimental data was not available for extraction. When results are mentioned in graphical format, all the data sets are converted into a standard fit equation, back tracking them is not optimal as error propagation will increase. Papers wherein correlations are used to predict or improve a property also cannot be used, directly. However, these papers cite other papers which can be back tracked to a source experimental paper. Looking through multiple Class-III papers, there was an interesting revelation.
+
+\subsubsection{ The Original Paper Mystery }
+
+When searching in the vast matrix of review, experimental and correlation papers, review papers of basic properties are a good source for back tracking to original source. One such paper is \cite{serrano-2013a}. It has over 200 reference papers, which are cited as source for the results in this paper. A natural back-tracking process was to single out the references cited multiple times , so that high volume of data can be obtained from one source file. 60 papers showed promise as a result which were then searched for via Science Direct and DTU find it. However, a surprising revelation was that most of the data in those papers, was modelled and the experimental values were taken from an older source which was cited. Another round of searching for experimental data led us in papers published in range 1960-1985. There was another issue here with the papers, a lot of them were missing on all searchable engines, some needed to be bought and some were restricted in access. A large portion of missing files were from ORNL quarterly publications, which are not available online because a virtual copy of them does not exist. This is being mitigated as people at ORNL are scanning the files and making them virtually available, however it is a slow process. With the availability of these Class-I files, a large amount of data should be gathered. This process and reduction in amount of papers is seen in Table \ref{tab:searchList}.
+
+\begin{table}[h]
+\caption{Reduction in Paper over layered search}
+\begin{adjustbox}{width=1\textwidth}
+\begin{tabular}{l|l|lll}
+\cline{1-2}
+\multicolumn{1}{|l|}{\textbf{Papers}} & \textbf{Search Layer}        & \textbf{}                                        &                                                                &                                                  \\ \hline
+                                      & 1                            & \multicolumn{1}{l|}{\textit{2}}                  & \multicolumn{1}{l|}{3}                                         & \multicolumn{1}{l|}{4}                           \\
+\textbf{Desired}                      & 230- Files                   & \multicolumn{1}{l|}{60-Usable Papers}            & \multicolumn{1}{l|}{20-Obtained Files}                         & \multicolumn{1}{l|}{\textbf{10-Extracted Files}} \\
+                                      & 150- Non-experimental Papers & \multicolumn{1}{l|}{40- Non-Experimental Papers} & \multicolumn{1}{l|}{10- Not Available, Pay wall, Not found} & \multicolumn{1}{l|}{}                           
+\end{tabular}
+\end{adjustbox}
+\label{tab:searchList}
+\end{table}
+
+This point needs to be kept in mind when the project is taken forward. Sweep search gives a large amount of quantitative results but did not yield relevant data. Instead doing a matrix back-through search with review papers is a technique recommended for future use. Towards the end of the report is a future work section, where other methods to further streamline the data gathering process is discussed. 
+This concludes the data gathering section. 
+\newpage
+
+
+
